@@ -29,7 +29,7 @@ export async function POST() {
       objectID: doc._id,
       title: doc.title,
       path: doc.path,
-      body: doc.body,
+      body: doc.content,
     }));
 
     // Use `saveObjects` with `indexName` in Algolia v5
