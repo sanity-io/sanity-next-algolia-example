@@ -22,7 +22,7 @@ export async function POST() {
       _id,
       title,
       "path": slug.current,
-      "body": pt::text(body)
+      "body": pt::text(content)
     }`);
 
     const records = sanityData.map((doc: any) => ({
