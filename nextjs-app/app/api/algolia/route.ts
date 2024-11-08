@@ -51,7 +51,7 @@ export async function POST() {
       objectID: doc._id,
       title: doc.title,
       path: doc.path,
-      body: doc.content ? toPlainText(doc.content) : '',
+      body: doc.content ? toPlainText(doc.content).slice(0, 9500) : '',
     }));
 
     // Use `saveObjects` with `indexName` in Algolia v5
