@@ -16,20 +16,42 @@ const sanityClient = createClient({
   useCdn: false,
 });
 
+interface Block {
+  _type: string;
+  children?: { text: string }[];
+}
+
+function toPlainText(blocks: Block[] = []) {
+  return blocks
+    // loop through each block
+    .map(block => {
+      // if it's not a text block with children, 
+      // return nothing
+      if (block._type !== 'block' || !block.children) {
+        return ''
+      }
+      // loop through the children spans, and join the
+      // text strings
+      return block.children.map(child => child.text).join('')
+    })
+    // join the paragraphs leaving split by two linebreaks
+    .join('\n\n')
+}
+
 export async function POST() {
   try {
     const sanityData = await sanityClient.fetch(`*[_type == "post"]{
       _id,
       title,
       "path": slug.current,
-      "body": pt::text(content)
+      content
     }`);
 
     const records = sanityData.map((doc: any) => ({
       objectID: doc._id,
       title: doc.title,
       path: doc.path,
-      body: doc.content,
+      body: doc.content ? toPlainText(doc.content) : '',
     }));
 
     // Use `saveObjects` with `indexName` in Algolia v5
