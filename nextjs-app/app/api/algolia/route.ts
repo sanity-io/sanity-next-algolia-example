@@ -58,6 +58,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         message: `Successfully deleted object with ID: ${_id}`,
       });
+      // If the operation is not delete, index the document
     } else {
       const doc = await sanityClient.fetch(
         `*[_id == $id][0]{
@@ -87,8 +88,6 @@ export async function POST(request: Request) {
         indexName,
         body: record,
       });
-      console.log(`Indexed object with ID: ${_id}`);
-      console.log('body:', record.body);
 
       return NextResponse.json({
         message: "Successfully processed operation!",
