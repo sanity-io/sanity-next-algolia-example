@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { algoliasearch } from "algoliasearch";
 import { createClient } from "@sanity/client";
 
@@ -55,7 +55,9 @@ export async function POST(request: Request) {
         objectID: _id,
       });
       console.log(`Deleted object with ID: ${_id}`);
-      return NextResponse.json({ message: `Successfully deleted object with ID: ${_id}` });
+      return NextResponse.json({
+        message: `Successfully deleted object with ID: ${_id}`,
+      });
     } else {
       const doc = await sanityClient.fetch(
         `*[_id == $id][0]{
@@ -78,7 +80,8 @@ export async function POST(request: Request) {
         objectID: doc._id,
         title: doc.title,
         path: doc.path,
-        body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
+        //body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
+        body: doc.content ? JSON.stringify(doc.content) : "",
       };
 
       await algoliaClient.saveObject({
@@ -86,6 +89,7 @@ export async function POST(request: Request) {
         body: record,
       });
       console.log(`Indexed object with ID: ${_id}`);
+      console.log('body:', record.body);
 
       return NextResponse.json({
         message: "Successfully processed operation!",
