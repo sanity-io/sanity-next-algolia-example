@@ -80,8 +80,7 @@ export async function POST(request: Request) {
         objectID: doc._id,
         title: doc.title,
         path: doc.path,
-        //body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
-        body: doc.content ? JSON.stringify(doc.content) : "",
+        body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
       };
 
       await algoliaClient.saveObject({
