@@ -41,6 +41,10 @@ export async function POST(request: Request) {
       console.log("Parsed Payload:", JSON.stringify(payload));
     } catch (jsonError) {
       console.warn("No JSON payload provided");
+      return NextResponse.json(
+        { error: "No payload provided" },
+        { status: 400 }
+      );
     }
 
     const { _id, operation } = payload;
@@ -51,7 +55,7 @@ export async function POST(request: Request) {
         objectID: _id,
       });
       console.log(`Deleted object with ID: ${_id}`);
-      // If the operation is not delete, but create or update
+      return NextResponse.json({ message: `Successfully deleted object with ID: ${_id}` });
     } else {
       const doc = await sanityClient.fetch(
         `*[_id == $id][0]{
@@ -73,6 +77,8 @@ export async function POST(request: Request) {
       const record = {
         objectID: doc._id,
         title: doc.title,
+        path: doc.path,
+        body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
       };
 
       await algoliaClient.saveObject({
