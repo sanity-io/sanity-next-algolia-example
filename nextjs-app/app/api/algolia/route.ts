@@ -17,24 +17,50 @@ const sanityClient = createClient({
   useCdn: false,
 });
 
-interface Block {
-  _type: string;
-  children?: { text: string }[];
-}
-
-function toPlainText(blocks: Block[] = []) {
-  return blocks
-    .map((block) => {
-      if (block._type !== "block" || !block.children) {
-        return "";
-      }
-      return block.children.map((child) => child.text).join("");
-    })
-    .join("\n\n");
-}
-
 export async function POST(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const initialIndex = searchParams.get("initialIndex") === "true";
+
+    if (initialIndex) {
+      // Initial indexing process
+      console.log("Starting initial indexing...");
+      const sanityData = await sanityClient.fetch(`*[_type == "post"]{
+        _id,
+        title,
+        slug,
+        "body": pt::text(content),
+        _type,
+        coverImage,
+        date,
+        _createdAt,
+        _updatedAt
+      }`);
+
+      const records = sanityData.map((doc: any) => ({
+        objectID: doc._id,
+        title: doc.title,
+        slug: doc.slug.current,
+        body: doc.body?.slice(0, 9500), // Truncate if necessary
+        coverImage: doc.coverImage,
+        date: doc.date,
+        _createdAt: doc._createdAt,
+        _updatedAt: doc._updatedAt,
+      }));
+
+      // Save all records to Algolia
+      await algoliaClient.saveObjects({
+        indexName,
+        objects: records,
+      });
+
+      console.log("Initial indexing completed.");
+      return NextResponse.json({
+        message: "Successfully completed initial indexing!",
+      });
+    }
+
+    // Incremental updates based on webhook payload
     let payload;
     try {
       payload = await request.json();
@@ -57,6 +83,7 @@ export async function POST(request: Request) {
     }
 
     if (operation === "delete") {
+      // Handle delete operation
       await algoliaClient.deleteObject({
         indexName,
         objectID: _id,
@@ -65,9 +92,9 @@ export async function POST(request: Request) {
       return NextResponse.json({
         message: `Successfully deleted object with ID: ${_id}`,
       });
-      // If the operation is not delete, index the document
     } else {
-        await algoliaClient.saveObject({
+      // Add or update the document in Algolia
+      await algoliaClient.saveObject({
         indexName,
         body: {
           ...value,
@@ -75,8 +102,9 @@ export async function POST(request: Request) {
         },
       });
 
+      console.log(`Indexed/Updated object with ID: ${_id}`);
       return NextResponse.json({
-        message: "Successfully processed operation!",
+        message: `Successfully processed document with ID: ${_id}!`,
       });
     }
   } catch (error: any) {
@@ -87,3 +115,4 @@ export async function POST(request: Request) {
     );
   }
 }
+
