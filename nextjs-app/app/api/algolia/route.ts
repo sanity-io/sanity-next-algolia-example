@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { _id, operation } = payload;
+    const { _id, operation, value } = payload;
 
     if (operation === "delete") {
       await algoliaClient.deleteObject({
@@ -60,33 +60,33 @@ export async function POST(request: Request) {
       });
       // If the operation is not delete, index the document
     } else {
-      const doc = await sanityClient.fetch(
-        `*[_id == $id][0]{
-          _id,
-          title,
-          "path": slug.current,
-          content
-        }`,
-        { id: _id }
-      );
+      // const doc = await sanityClient.fetch(
+      //   `*[_id == $id][0]{
+      //     _id,
+      //     title,
+      //     "path": slug.current,
+      //     content
+      //   }`,
+      //   { id: _id }
+      // );
 
-      if (!doc) {
-        return NextResponse.json(
-          { error: `Document with ID ${_id} not found in Sanity` },
-          { status: 404 }
-        );
-      }
+      // if (!doc) {
+      //   return NextResponse.json(
+      //     { error: `Document with ID ${_id} not found in Sanity` },
+      //     { status: 404 }
+      //   );
+      // }
 
-      const record = {
-        objectID: doc._id,
-        title: doc.title,
-        path: doc.path,
-        body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
-      };
+      // const record = {
+      //   objectID: doc._id,
+      //   title: doc.title,
+      //   path: doc.path,
+      //   body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
+      // };
 
       await algoliaClient.saveObject({
         indexName,
-        body: record,
+        body: value,
       });
 
       return NextResponse.json({
