@@ -49,6 +49,13 @@ export async function POST(request: Request) {
 
     const { _id, operation, value } = payload;
 
+    if (!operation || !_id || !value) {
+      return NextResponse.json(
+        { error: "Invalid payload, missing required fields" },
+        { status: 400 }
+      );
+    }
+
     if (operation === "delete") {
       await algoliaClient.deleteObject({
         indexName,
@@ -60,33 +67,12 @@ export async function POST(request: Request) {
       });
       // If the operation is not delete, index the document
     } else {
-      // const doc = await sanityClient.fetch(
-      //   `*[_id == $id][0]{
-      //     _id,
-      //     title,
-      //     "path": slug.current,
-      //     content
-      //   }`,
-      //   { id: _id }
-      // );
-
-      // if (!doc) {
-      //   return NextResponse.json(
-      //     { error: `Document with ID ${_id} not found in Sanity` },
-      //     { status: 404 }
-      //   );
-      // }
-
-      // const record = {
-      //   objectID: doc._id,
-      //   title: doc.title,
-      //   path: doc.path,
-      //   body: doc.content ? toPlainText(doc.content).slice(0, 9500) : "",
-      // };
-
-      await algoliaClient.saveObject({
+        await algoliaClient.saveObject({
         indexName,
-        body: value,
+        body: {
+          ...value,
+          objectID: _id,
+        },
       });
 
       return NextResponse.json({
