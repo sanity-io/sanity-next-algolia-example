@@ -8,7 +8,7 @@ const sanityProjectId = process.env.SANITY_PROJECT_ID!;
 const sanityDataset = process.env.SANITY_DATASET!;
 
 const algoliaClient = algoliasearch(algoliaAppId, algoliaApiKey);
-const indexName = "my-index"; // Define the index name here
+const indexName = "my-index";
 
 const sanityClient = createClient({
   projectId: sanityProjectId,
@@ -17,47 +17,55 @@ const sanityClient = createClient({
   useCdn: false,
 });
 
+// Function to perform initial indexing
+async function performInitialIndexing() {
+  console.log("Starting initial indexing...");
+
+  // Fetch all documents from Sanity
+  const sanityData = await sanityClient.fetch(`*[_type == "post"]{
+    _id,
+    title,
+    slug,
+    "body": pt::text(content),
+    _type,
+    coverImage,
+    date,
+    _createdAt,
+    _updatedAt
+  }`);
+
+  const records = sanityData.map((doc: any) => ({
+    objectID: doc._id,
+    title: doc.title,
+    slug: doc.slug.current,
+    body: doc.body?.slice(0, 9500), // Truncate if necessary
+    coverImage: doc.coverImage,
+    date: doc.date,
+    _createdAt: doc._createdAt,
+    _updatedAt: doc._updatedAt,
+  }));
+
+  // Save all records to Algolia
+  await algoliaClient.saveObjects({
+    indexName,
+    objects: records,
+  });
+
+  console.log("Initial indexing completed.");
+  return {
+    message: "Successfully completed initial indexing!",
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const initialIndex = searchParams.get("initialIndex") === "true";
 
+    // Perform initial indexing
     if (initialIndex) {
-      // Initial indexing process
-      console.log("Starting initial indexing...");
-      const sanityData = await sanityClient.fetch(`*[_type == "post"]{
-        _id,
-        title,
-        slug,
-        "body": pt::text(content),
-        _type,
-        coverImage,
-        date,
-        _createdAt,
-        _updatedAt
-      }`);
-
-      const records = sanityData.map((doc: any) => ({
-        objectID: doc._id,
-        title: doc.title,
-        slug: doc.slug.current,
-        body: doc.body?.slice(0, 9500), // Truncate if necessary
-        coverImage: doc.coverImage,
-        date: doc.date,
-        _createdAt: doc._createdAt,
-        _updatedAt: doc._updatedAt,
-      }));
-
-      // Save all records to Algolia
-      await algoliaClient.saveObjects({
-        indexName,
-        objects: records,
-      });
-
-      console.log("Initial indexing completed.");
-      return NextResponse.json({
-        message: "Successfully completed initial indexing!",
-      });
+      const response = await performInitialIndexing();
+      return NextResponse.json(response);
     }
 
     // Incremental updates based on webhook payload
@@ -115,4 +123,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
