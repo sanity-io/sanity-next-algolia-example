@@ -570,7 +570,7 @@ export type GetPageQueryResult = {
 export type AllPostsQueryResult = Array<{
   _id: string;
   status: "draft" | "published";
-  title: string | "Untitled";
+  title: string;
   slug: string;
   excerpt: string | null;
   coverImage: {
@@ -608,7 +608,7 @@ export type AllPostsQueryResult = Array<{
 export type MorePostsQueryResult = Array<{
   _id: string;
   status: "draft" | "published";
-  title: string | "Untitled";
+  title: string;
   slug: string;
   excerpt: string | null;
   coverImage: {
@@ -679,7 +679,7 @@ export type PostQueryResult = {
   }> | null;
   _id: string;
   status: "draft" | "published";
-  title: string | "Untitled";
+  title: string;
   slug: string;
   excerpt: string | null;
   coverImage: {
