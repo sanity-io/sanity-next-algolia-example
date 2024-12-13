@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { algoliasearch } from "algoliasearch";
 import { createClient } from "@sanity/client";
+import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
 
 const algoliaAppId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!;
 const algoliaApiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY!;
 const sanityProjectId = process.env.SANITY_PROJECT_ID!;
 const sanityDataset = process.env.SANITY_DATASET!;
+const webhookSecret = process.env.SANITY_WEBHOOK_SECRET!;
 
 const algoliaClient = algoliasearch(algoliaAppId, algoliaApiKey);
 const indexName = "my-index";
@@ -68,10 +70,30 @@ export async function POST(request: Request) {
       return NextResponse.json(response);
     }
 
+     // Validate webhook signature
+     const signature = request.headers.get(SIGNATURE_HEADER_NAME);
+     if (!signature) {
+       return NextResponse.json(
+         { success: false, message: "Missing signature header" },
+         { status: 401 }
+       );
+     }
+ 
+     // Get request body for signature validation
+     const body = await request.text(); 
+     const isValid = await isValidSignature(body, signature, webhookSecret);
+ 
+     if (!isValid) {
+       return NextResponse.json(
+         { success: false, message: "Invalid signature" },
+         { status: 401 }
+       );
+     }
+
     // Incremental updates based on webhook payload
     let payload;
     try {
-      payload = await request.json();
+      payload = JSON.parse(body);
       console.log("Parsed Payload:", JSON.stringify(payload));
     } catch (jsonError) {
       console.warn("No JSON payload provided");
