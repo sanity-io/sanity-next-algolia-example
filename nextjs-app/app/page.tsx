@@ -27,7 +27,7 @@ export default async function Page() {
             </div>
             <div className="mt-6 space-y-6 prose sm:prose-lg md:prose-xl lg:prose-2xl text-gray-700">
               <p>
-                By integrating Sanity's structured content with Algolia, you can provide your users with fast, relevant search results and gather insights into what they are looking for.
+                By integrating Sanity&lsquo;s structured content with Algolia, you can provide your users with fast, relevant search results and gather insights into what they are looking for.
               </p>
             </div>
               <h3 className="p-2 mt-8 text-4xl font-semibold">Search with Algolia</h3>
