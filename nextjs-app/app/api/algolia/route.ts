@@ -19,41 +19,6 @@ const sanityClient = createClient({
   useCdn: false,
 });
 
-const MAX_RECORD_SIZE = 10000; // Maximum size in bytes for an Algolia record
-
-
-// Function to estimate the size of a record
-function estimateRecordSize(record: Record<string, unknown>): number {
-  return new TextEncoder().encode(JSON.stringify(record)).length;
-}
-
-// Function to truncate oversized fields
-function truncateOversizedField(field: string, maxLength: number): string {
-  return field.length > maxLength ? field.slice(0, maxLength) : field;
-}
-
-// Function to shard a document into multiple Algolia records
-function shardDocument(doc: any): any[] {
-  const baseRecord = {
-    objectID: doc._id,
-    title: doc.title,
-    slug: doc.slug?.current,
-    coverImage: doc.coverImage,
-    date: doc.date,
-    _createdAt: doc._createdAt,
-    _updatedAt: doc._updatedAt,
-  };
-
-  // Split the body field into chunks if it's too large
-  const chunks = doc.body?.match(/.{1,9000}/g) || [''];
-  return chunks.map((chunk: string, index: number) => ({
-    ...baseRecord,
-    body: chunk,
-    objectID: `${doc._id}-${index}`, // Unique ID for each shard
-    shardIndex: index,
-  }));
-}
-
 // Function to perform initial indexing
 async function performInitialIndexing() {
   console.log("Starting initial indexing...");
@@ -71,44 +36,16 @@ async function performInitialIndexing() {
     _updatedAt
   }`);
 
-  const records: { 
-    objectID: string; 
-    title: string; 
-    slug: string; 
-    coverImage?: string; 
-    date?: string; 
-    _createdAt: string; 
-    _updatedAt: string; 
-    body?: string; 
-    shardIndex?: number;
-  }[] = [];
-
-  sanityData.forEach((doc: any) => {
-    const baseRecord = {
-      objectID: doc._id,
-      title: truncateOversizedField(doc.title, 100), // Truncate title if needed
-      slug: doc.slug?.current || '',
-      coverImage: doc.coverImage,
-      date: doc.date,
-      _createdAt: doc._createdAt,
-      _updatedAt: doc._updatedAt,
-    };
-
-    const recordSize = estimateRecordSize(baseRecord);
-
-    if (recordSize > MAX_RECORD_SIZE) {
-      // If the base record is too large, split it into shards
-      console.warn(`Document ${doc._id} exceeds size limit. Sharding...`);
-      records.push(...shardDocument(doc));
-    } else {
-      // Truncate the body field and add the record
-      const truncatedBody = truncateOversizedField(doc.body || '', 9000); // Ensure body fits
-      records.push({
-        ...baseRecord,
-        body: truncatedBody,
-      });
-    }
-  });
+  const records = sanityData.map((doc: any) => ({
+    objectID: doc._id,
+    title: doc.title,
+    slug: doc.slug.current,
+    body: doc.body?.slice(0, 9500), // Truncate if necessary
+    coverImage: doc.coverImage,
+    date: doc.date,
+    _createdAt: doc._createdAt,
+    _updatedAt: doc._updatedAt,
+  }));
 
   // Save all records to Algolia
   await algoliaClient.saveObjects({
