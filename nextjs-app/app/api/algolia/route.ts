@@ -1,30 +1,22 @@
 import { NextResponse } from "next/server";
 import { algoliasearch } from "algoliasearch";
-import { createClient } from "@sanity/client";
+import { client } from "@/sanity/lib/client";
 import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
 
 const algoliaAppId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!;
 const algoliaApiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY!;
-const sanityProjectId = process.env.SANITY_PROJECT_ID!;
-const sanityDataset = process.env.SANITY_DATASET!;
 const webhookSecret = process.env.SANITY_WEBHOOK_SECRET!;
 
 const algoliaClient = algoliasearch(algoliaAppId, algoliaApiKey);
+// Add name for your Algolia index
 const indexName = "my-index";
-
-const sanityClient = createClient({
-  projectId: sanityProjectId,
-  dataset: sanityDataset,
-  apiVersion: "2021-03-25",
-  useCdn: false,
-});
 
 // Function to perform initial indexing
 async function performInitialIndexing() {
   console.log("Starting initial indexing...");
 
   // Fetch all documents from Sanity
-  const sanityData = await sanityClient.fetch(`*[_type == "post"]{
+  const sanityData = await client.fetch(`*[_type == "post"]{
     _id,
     title,
     slug,
@@ -41,7 +33,7 @@ async function performInitialIndexing() {
     title: doc.title,
     slug: doc.slug.current,
     /**
-     *  Truncating the body if it's too long. 
+     *  Truncating the body if it's too long.
      *  Another approach: defining multiple records:
      *  https://www.algolia.com/doc/guides/sending-and-managing-data/prepare-your-data/how-to/indexing-long-documents/
      */
@@ -75,25 +67,25 @@ export async function POST(request: Request) {
       return NextResponse.json(response);
     }
 
-     // Validate webhook signature
-     const signature = request.headers.get(SIGNATURE_HEADER_NAME);
-     if (!signature) {
-       return NextResponse.json(
-         { success: false, message: "Missing signature header" },
-         { status: 401 }
-       );
-     }
- 
-     // Get request body for signature validation
-     const body = await request.text(); 
-     const isValid = await isValidSignature(body, signature, webhookSecret);
- 
-     if (!isValid) {
-       return NextResponse.json(
-         { success: false, message: "Invalid signature" },
-         { status: 401 }
-       );
-     }
+    // Validate webhook signature
+    const signature = request.headers.get(SIGNATURE_HEADER_NAME);
+    if (!signature) {
+      return NextResponse.json(
+        { success: false, message: "Missing signature header" },
+        { status: 401 }
+      );
+    }
+
+    // Get request body for signature validation
+    const body = await request.text();
+    const isValid = await isValidSignature(body, signature, webhookSecret);
+
+    if (!isValid) {
+      return NextResponse.json(
+        { success: false, message: "Invalid signature" },
+        { status: 401 }
+      );
+    }
 
     // Incremental updates based on webhook payload
     let payload;
