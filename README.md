@@ -6,12 +6,17 @@ _the website this template generates_
 ![Algolia Search implemented on the front-end](https://cdn.sanity.io/images/hyd9q7fy/6776304977675a6136/9865b1a117a4c2f7c9a281329de3a4042693199c-1918x484.png)
 _Algolia search implemented on the front-end_
 
-![Screenshot of Sanity Studio using Presentation Tool to do Visual Editing](https://cdn.sanity.io/images/fkfgfb3d/production/8971f921877c85b21dc1fc0d84031ee1886bc99d-1488x890.png)
-_Visual Editing using Sanity's Presentation Tool_
-
 This starter is a statically generated website and blog built with [Next.js 15](https://nextjs.org/blog/next-15) (App Router) for the frontend and powered by [Sanity][sanity-homepage] for content management. It includes a standalone Sanity Studio, providing features like real-time collaboration, visual editing, and live updates through its [Presentation][presentation] mode.
 
 The Studio integrates with Sanity's Content Lake, offering hosted content APIs with a flexible query language, on-demand image transformations, advanced patching, and more. These capabilities seamlessly connect to your frontend via Sanity’s [Live Content API](https://www.sanity.io/live), enabling live, dynamic updates without requiring page reloads. Whether you are launching a blog, building a website, or exploring new technologies, this starter gives you a solid foundation to get started.
+
+This repository provides an example of how to enable search indexing with Algolia and implement a front-end Search component to display search results. By using webhook and a cloud function allows you to keep your Algolia search index up-to-date as you publish, update, and delete content in Sanity.
+
+## Implementation Guide
+🌐 [https://www.sanity.io/guides/how-to-implement-front-end-search-with-sanity](https://www.sanity.io/guides/how-to-implement-front-end-search-with-sanity)
+
+## Demo
+🌐 [https://sanity-next-algolia-example.sanity.dev](https://sanity-next-algolia-example.sanity.dev/)
 
 ## Features
 
@@ -23,10 +28,6 @@ The Studio integrates with Sanity's Content Lake, offering hosted content APIs w
 - **AI-powered Media Support:** Auto-generate alt text with [Sanity AI Assist](https://www.sanity.io/ai-assist).
 - **On-demand Publishing:** No waiting for rebuilds—new content is live instantly with Incremental Static Revalidation.
 - **Easy Media Management:** [Integrated Unsplash support](https://www.sanity.io/plugins/sanity-plugin-asset-source-unsplash) for seamless media handling.
-
-## Demo
-
-🌐 [https://template-nextjs-clean.sanity.dev](https://template-nextjs-clean.sanity.dev/)
 
 ## Get Started Quickly
 
@@ -160,6 +161,7 @@ When developing your app, you'll run the files locally. Pushing your changes to 
 
 ## 📚 Additional Resources
 
+- 🎓 [Algolia + Sanity + Next.js implementation guide](https://www.sanity.io/guides/how-to-implement-front-end-search-with-sanity)
 - 🎓 [Sanity Learn: Work-ready Next.js](https://www.sanity.io/learn/track/work-ready-next-js)
 - 📖 [Sanity Documentation](https://www.sanity.io/docs)
 - 💬 [Join the Sanity Community](https://slack.sanity.io)
