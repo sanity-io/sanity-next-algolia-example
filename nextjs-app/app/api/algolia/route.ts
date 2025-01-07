@@ -4,12 +4,11 @@ import { client } from "@/sanity/lib/client";
 import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
 
 const algoliaAppId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!;
-const algoliaApiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY!;
+const algoliaApiKey = process.env.ALGOLIA_API_KEY!;
 const webhookSecret = process.env.SANITY_WEBHOOK_SECRET!;
+const indexName = process.env.ALGOLIA_INDEX_NAME!;
 
 const algoliaClient = algoliasearch(algoliaAppId, algoliaApiKey);
-// Add name for your Algolia index
-const indexName = "my-index";
 
 // Function to perform initial indexing
 async function performInitialIndexing() {
