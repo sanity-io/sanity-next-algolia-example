@@ -7,7 +7,6 @@ import Link from 'next/link';
 
 const algoliaAppId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!;
 const algoliaApiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY!;
-const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME!;
 
 const searchClient = algoliasearch(algoliaAppId, algoliaApiKey);
 
@@ -17,7 +16,7 @@ export function Search() {
 
     return (
         <InstantSearchNext
-            indexName={indexName}
+            indexName="my-index"
             searchClient={searchClient}
             initialUiState={{
                 'my-index': { query: '' },
