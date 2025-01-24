@@ -192,6 +192,9 @@ To deploy your Sanity Studio, follow these steps:
 
    - Click on "Environment Variables"
    - Add all the variables from your `.env` file. Don't forget to set `NEXT_PUBLIC_SANITY_STUDIO_URL` the url of your deployed studio.
+   - Add Algolia environment variables `NEXT_PUBLIC_ALGOLIA_APP_ID`, `ALGOLIA_API_KEY`, and `ALGOLIA_INDEX_NAME` as environment variables in Vercel. You can find these in your Algolia account dashboard. 
+
+> **Tip:** Algolia comes with a set of predefined API keys. Search API Key works on all your Algolia application indices and is safe to use in your production frontend code. Write API Key is used to create, update and DELETE your indices.
 
 6. Click "Deploy" to start the deployment process.
 
