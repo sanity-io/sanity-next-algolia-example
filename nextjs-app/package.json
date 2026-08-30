@@ -10,7 +10,7 @@
     "typegen": "sanity typegen generate"
   },
   "dependencies": {
-    "@sanity/image-url": "^1.1.0",
+    "@sanity/image-url": "^2.1.1",
     "@sanity/preview-url-secret": "^2.0.5",
     "@sanity/webhook": "^4.0.4",
     "@tailwindcss/typography": "^0.5.15",
